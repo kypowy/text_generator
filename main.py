@@ -3,6 +3,7 @@
 import torch
 import regex as re
 import text_init
+import AI_init
 
 
 def generate_tokens(src):
@@ -15,11 +16,12 @@ def generate_tokens(src):
         (tensor): tokens (generatet text)
     """
     tgt = src + [0 for _ in range(text_init.TEXT_LENTH - len(src))]
-    tgt = torch.tensor(tgt)
-    src = tgt.clone()
+    tgt = torch.tensor(tgt).to(AI_init.device)
+    src = tgt.clone().to(AI_init.device)
 
     parameters = torch.load("parameters.pkl")
-    model = torch.load("architecture.pkl", weights_only=False)
+    model = torch.load("architecture.pkl",
+                       weights_only=False).to(AI_init.device)
     model.load_state_dict(parameters)
 
     for word_index in range(len(src) - text_init.TEXT_LENTH,
@@ -54,4 +56,4 @@ def generate_text(start_text: str):
 
 
 if __name__ == "__main__":
-    print(generate_text("arxiv для нас"))
+    print(generate_text("arxiv нас"))

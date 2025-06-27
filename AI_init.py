@@ -128,27 +128,27 @@ class Transformer(torch.nn.Module):
         self.num_tokens = num_tokens
         self.num_layers = 2
 
-        self.token_emb = nn.Embedding(num_tokens, d_model)
-        self.pos_emb = PositionalEncoding(d_model, seq_length)
+        self.token_emb = nn.Embedding(num_tokens, d_model).to(device)
+        self.pos_emb = PositionalEncoding(d_model, seq_length).to(device)
         self.decoder_layer = nn.ModuleList([DecoderLayer(d_model=d_model,
-                                           num_heads=2,
-                                           d_ff=512,
+                                           num_heads=4,
+                                           d_ff=128,
                                            dropout=0.2)
-                                            for _ in range(self.num_layers)])
+                                            for _ in range(self.num_layers)]).to(device)
 
         self.encoder_layer = nn.ModuleList([EncoderLayer(d_model=d_model,
-                                           num_heads=2,
-                                           d_ff=512,
+                                           num_heads=4,
+                                           d_ff=128,
                                            dropout=0.2)
-                                            for _ in range(self.num_layers)])
+                                            for _ in range(self.num_layers)]).to(device)
 
-        self.ff = nn.Linear(d_model, num_tokens)
+        self.ff = nn.Linear(d_model, num_tokens).to(device)
 
     def generate_mask(self, src, tgt):
         nopeak_mask = (1 - torch.triu(torch.ones(1,
                                                  self.seq_lenth,
                                                  self.seq_lenth),
-                                      diagonal=1)).bool()
+                                      diagonal=1)).to(device).bool()
         tgt_mask = tgt & nopeak_mask
 
         return src, tgt_mask.squeeze(0)
@@ -170,14 +170,17 @@ class Transformer(torch.nn.Module):
         return result
 
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 transformer = Transformer(num_tokens=len(text_init.learn_dict),
                           seq_length=text_init.TEXT_LENTH,
-                          d_model=128)
+                          d_model=64).to(device)
 optimizer = torch.optim.AdamW(transformer.parameters(),
-                              lr=3e-4)
+                              lr=1e-4,
+                              weight_decay=1e-3)
 loss = torch.nn.CrossEntropyLoss()
 
 
 if __name__ == "__main__":
-    random_data = torch.randint(low=0, high=2000, size=(20, 20))
+    random_data = torch.randint(low=0, high=2000, size=(text_init.TEXT_LENTH,
+                                                        text_init.TEXT_LENTH))
     summary(transformer, input_data=(random_data, random_data))

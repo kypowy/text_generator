@@ -6,10 +6,10 @@ import text_init as learn_t
 source = learn_t.src[: -1]
 AI_init.transformer.train()
 
-for epoch in range(7):
+for epoch in range(30):
     for batch, _ in enumerate(source):
-        src = torch.tensor(source[batch][: -1], dtype=int)
-        tgt = torch.tensor(source[batch][1:], dtype=int)
+        src = torch.tensor(source[batch][: -1], dtype=int).to(AI_init.device)
+        tgt = torch.tensor(source[batch][1:], dtype=int).to(AI_init.device)
 
         AI_init.optimizer.zero_grad()
         output = AI_init.transformer(src=src,
@@ -25,6 +25,9 @@ for epoch in range(7):
     print([f"{learn_t.learn_dict[i]} {i.item()}"
            for i in torch.argmax(output, dim=-1)[0]])
 
-if __name__ == "__main__":
     torch.save(AI_init.transformer.state_dict(), "parameters.pkl")
     torch.save(AI_init.transformer, "architecture.pkl")
+
+# if __name__ == "__main__":
+#     torch.save(AI_init.transformer.state_dict(), "parameters.pkl")
+#     torch.save(AI_init.transformer, "architecture.pkl")
