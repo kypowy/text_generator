@@ -56,4 +56,5 @@ def generate_text(start_text: str):
 
 
 if __name__ == "__main__":
+    print("Tut bil matwo Xdxdxxd")
     print(generate_text("arxiv нас"))
